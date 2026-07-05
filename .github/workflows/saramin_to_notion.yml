@@ -1,0 +1,49 @@
+name: 사람인 공고 → Notion 자동 업로드
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # 매일 오전 9시 KST (UTC 00:00)
+  workflow_dispatch:        # GitHub UI에서 수동 실행 가능
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: seen_jobs.json 복원 (캐시)
+        uses: actions/cache@v4
+        with:
+          path: seen_jobs.json
+          key: seen-jobs-${{ github.run_id }}
+          restore-keys: |
+            seen-jobs-
+
+      - name: 사람인 → Notion 실행
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          SARAMIN_SENDER: ${{ vars.SARAMIN_SENDER || 'saramin.co.kr' }}
+          DAYS_BACK: ${{ vars.DAYS_BACK || '2' }}
+        run: python main.py
+
+      - name: seen_jobs.json 커밋 (중복 방지 이력 저장)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f seen_jobs.json
+          git diff --cached --quiet || git commit -m "chore: seen_jobs.json 업데이트 [skip ci]"
+          git push

@@ -1,0 +1,22 @@
+# 환경 변수 (Gmail 계정, 앱 비밀번호 등 민감 정보)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 가상 환경
+.venv/
+venv/
+env/
+
+# 런타임 상태 파일 (중복 처리용 이력) — GitHub Actions가 커밋으로 관리
+# seen_jobs.json
+
+# 디버그 파일
+debug_email.html
+debug_*.html
+
+# macOS
+.DS_Store
