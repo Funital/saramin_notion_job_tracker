@@ -20,3 +20,6 @@ debug_*.html
 
 # macOS
 .DS_Store
+
+# 개인 문서
+experience.txt
